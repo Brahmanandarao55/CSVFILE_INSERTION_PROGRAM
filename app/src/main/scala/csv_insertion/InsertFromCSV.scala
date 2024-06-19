@@ -16,18 +16,25 @@ object InsertFromCSV extends App {
   val connection: Connection = DriverManager.getConnection(url, username, password)
 
   // Path to your CSV file
-  val csvFilePath = "C:\\Users\\Brahmananda Rao\\Desktop\\CSV_INSERTION\\app\\src\\main\\scala\\csv_insertion\\csvdata.csv"
+  val csvFilePath = "C:\\Users\\Brahmananda Rao\\Desktop\\Check\\CSVFILE_INSERTION_PROGRAM\\app\\src\\main\\scala\\csv_insertion\\data.csv"
+
   val startTime = System.currentTimeMillis()
   try {
-    // Read data from CSV file
+    // Disable auto-commit for faster inserts
+    connection.setAutoCommit(false)
+
+    // Read data from CSV file (skip header if exists)
     val bufferedSource = scala.io.Source.fromFile(new File(csvFilePath))
-    val lines = bufferedSource.getLines().drop(1) // Skip header if exists
+    val lines = bufferedSource.getLines().drop(1)  // Skip header
 
     // Prepare SQL statement
     val insertStatement = "INSERT INTO csvtable (ID, NAME, AGE) VALUES (?, ?, ?)"
     val preparedStatement = connection.prepareStatement(insertStatement)
 
-    // Iterate over lines and insert data
+    // Batch size for inserts
+    val batchSize = 1000
+
+    var count = 0
     lines.foreach { line =>
       val fields = line.split(",").map(_.trim)
       val id = fields(0).toInt
@@ -37,14 +44,27 @@ object InsertFromCSV extends App {
       preparedStatement.setInt(1, id)
       preparedStatement.setString(2, name)
       preparedStatement.setInt(3, age)
+      preparedStatement.addBatch()
 
-      preparedStatement.executeUpdate()
+      count += 1
+
+      // Execute batch every 'batchSize' records
+      if (count % batchSize == 0) {
+        preparedStatement.executeBatch()
+      }
     }
+    // Execute remaining batch
+    preparedStatement.executeBatch()
+
+    // Commit transaction
+    connection.commit()
 
     println("Data inserted successfully!")
   } catch {
     case e: Exception =>
       println(s"Error inserting data: ${e.getMessage}")
+      // Rollback transaction on error
+      connection.rollback()
   } finally {
     // Close resources
     if (connection != null) connection.close()
@@ -54,4 +74,3 @@ object InsertFromCSV extends App {
     println(s"Total insertion time: ${totalTimeSeconds} seconds")
   }
 }
-
