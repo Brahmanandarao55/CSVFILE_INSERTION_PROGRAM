@@ -1,6 +1,7 @@
 package csv_insertion
+import com.opencsv.CSVWriter
 
-import java.io.File
+import java.io.{File, FileWriter}
 import java.sql.{Connection, DriverManager, PreparedStatement}
 
 object InsertFromCSV extends App {
@@ -29,9 +30,10 @@ object InsertFromCSV extends App {
 
     // Prepare SQL statement
     val insertStatement = "INSERT INTO csvtable (ID, NAME, AGE) VALUES (?, ?, ?)"
+
     val preparedStatement = connection.prepareStatement(insertStatement)
 
-    // Batch size for inserts
+   // Batch size for inserts
     val batchSize = 1000
 
     var count = 0
@@ -58,7 +60,7 @@ object InsertFromCSV extends App {
 
     // Commit transaction
     connection.commit()
-
+    bufferedSource.close()
     println("Data inserted successfully!")
   } catch {
     case e: Exception =>
