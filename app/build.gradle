@@ -23,9 +23,13 @@ dependencies {
     implementation 'com.opencsv:opencsv:5.5'
 
     // Use Scalatest for testing our library
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.scalatest:scalatest_2.13:3.2.13'
-    testImplementation 'org.scalatestplus:junit-4-13_2.13:3.2.2.0'
+//    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.scalactic:scalactic_2.12:3.0.4'
+    testImplementation 'org.scalatest:scalatest_2.12:3.0.4'
+//    testImplementation 'org.scalatestplus:junit-4-13_2.13:3.2.2.0'
+    testImplementation 'org.scalatestplus:mockito-3-4_2.12:3.2.9.0'
+    testImplementation 'io.cucumber:cucumber-scala_2.12:8.20.0'
+    testImplementation 'io.cucumber:cucumber-junit:6.10.0'
 
     // Need scala-xml at test runtime
     testRuntimeOnly 'org.scala-lang.modules:scala-xml_2.13:1.2.0'
@@ -34,6 +38,15 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClass = 'csv_insertion.App'
+}
+
+test{
+    reports.html.enabled false
+    doFirst {
+        def cp =classpath.getFiles().join(File.pathSeparator)
+        environment 'CLASSPATH', cp
+        classpath = classpath.filter {false}
+    }
 }
 
 

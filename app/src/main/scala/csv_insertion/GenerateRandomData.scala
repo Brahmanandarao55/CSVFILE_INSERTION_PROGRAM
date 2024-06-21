@@ -1,4 +1,3 @@
-/*
 package csv_insertion
 
 import java.io.PrintWriter
@@ -43,4 +42,3 @@ object GenerateRandomData {
     names(randomIndex)
   }
 }
-*/
